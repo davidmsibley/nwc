@@ -202,8 +202,11 @@
                 $scope.siteStatisticsParameters = siteStatisticsParameters;
                 siteStatisticsParameters.statGroups = siteStatisticsParameters.statGroups || [];
                 siteStatisticsParameters.startDate =  siteStatisticsParameters.startDate || Date.create(CommonState.streamFlowStatMinDate).utc();
+                CommonState.streamFlowStatMaxDate = siteStatisticsParameters.endDate || Date.create(CommonState.streamFlowStatMaxDate).utc();
                 siteStatisticsParameters.endDate =  siteStatisticsParameters.endDate || Date.create(CommonState.streamFlowStatMaxDate).utc();
-
+                CommonState.streamFlowStatMinDate = siteStatisticsParameters.startDate.clone();
+                CommonState.streamFlowStatMaxDate = siteStatisticsParameters.endDate.clone();
+                
                 $scope.dateFormat = 'yyyy-MM-dd';
                 $scope.minDate = CommonState.streamFlowStatMinDate;
                 $scope.maxDate = CommonState.streamFlowStatMaxDate;
