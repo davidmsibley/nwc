@@ -32,6 +32,7 @@ var nwcApp = angular.module('nwcApp', [
 
 nwcApp.config(['$stateProvider', '$urlRouterProvider',
     function ($stateProvider, $urlRouterProvider) {
+        //TODO[Sibley]  Is this really the default route we want?
         $urlRouterProvider.otherwise('/workflow/aquatic-biology/select-biodata-site');
         var clientBasePath = '../client/nwc/';
         var workflowsBasePath = clientBasePath + 'workflows/';

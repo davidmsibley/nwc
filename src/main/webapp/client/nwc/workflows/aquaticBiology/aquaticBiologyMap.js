@@ -15,12 +15,48 @@
                         CONFIG.endpoint.geoserver + 'wms',
                         {
                             layers: 'BioData:SiteInfo',
+                            STYLES: 'bioData',
                             transparent: true
                         },
                         BaseMap.getWorkflowLayerOptions()
                 );
                 bioDataSitesLayer.id = 'biodata-sites-feature-layer';
+                
+                // ////////////////////////////////////////////// GAGES
+                var gageFeatureLayer = new OpenLayers.Layer.WMS(
+                    "Gage Location",
+                    CONFIG.endpoint.geoserver + 'NWC/wms',
+                    {
+                        LAYERS: "NWC:gagesII",
+                        STYLES: 'blue_circle',
+                        format: 'image/png',
+                        transparent: true,
+                        tiled: true
+                    },
+                    {
+                        isBaseLayer: false,
+                        displayInLayerSwitcher: false,
+                        visibility: false
+                    }
+                );
+                gageFeatureLayer.id = 'gage-feature-layer';
+                mapLayers.push(gageFeatureLayer);
                 mapLayers.push(bioDataSitesLayer);
+                
+                var hucLayerOptions = BaseMap.getWorkflowLayerOptions();
+                hucLayerOptions.visibility = false;
+                var hucLayer = new OpenLayers.Layer.WMS("National WBD Snapshot",
+                    CONFIG.endpoint.geoserver + 'gwc/service/wms',
+                    {
+                        layers: 'NWC:huc12_SE_Basins_v2',
+                        transparent: true,
+                        styles: ['polygon']
+                    },
+                    hucLayerOptions
+                );
+                hucLayer.id = 'hucs';
+                
+                mapLayers.push(hucLayer);
                 
                 // ////////////////////////////////////////////// FLOWLINES
                 var flowlinesData = new OpenLayers.Layer.FlowlinesData(
@@ -89,7 +125,33 @@
                 
                 flowlineRaster.setStreamOrderClipValues(map.getNumZoomLevels());
                 flowlineRaster.updateFromClipValue(flowlineRaster.getClipValueForZoom(map.zoom));
+                
+                /**
+                 * 
+                 * @param {String} interest one of 'observed' or 'modeled'
+                 */
+                map.switchToInterest = function(interest){
+                    if('observed' === interest){
+//                        hucsGetFeatureInfoControl.deactivate();
+                        hucLayer.setVisibility(false);
+                        StoredState.streamFlowStatHucFeature = undefined;
 
+                        gageFeatureLayer.setVisibility(true);
+//                        wmsGetFeatureInfoControl.activate();
+                    }
+                    else if('modeled' === interest){
+                        gageFeatureLayer.setVisibility(false);
+//                        wmsGetFeatureInfoControl.deactivate();
+                        StoredState.gage = undefined;
+
+                        hucLayer.setVisibility(true);
+//                        hucsGetFeatureInfoControl.activate();
+                    } else {
+                        hucLayer.setVisibility(false);
+                        gageFeatureLayer.setVisibility(false);
+                    }
+                };
+                
                 //stash it in a closure var
                 privateMap = map;
                 return privateMap;

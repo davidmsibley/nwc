@@ -18,6 +18,14 @@
             },
             function($scope, StoredState, $sce){
                 $scope.description = $sce.trustAsHtml($scope.description);
+                $scope.observedSelected = function() {
+                    var result = 'observed' === StoredState.interestType;
+                    return result;
+                };
+                $scope.modeledSelected = function() {
+                    var result = 'modeled' === StoredState.interestType;
+                    return result;
+                };
             }
         )
     ]);
@@ -42,7 +50,15 @@
                     false
                 );
         
+                $scope.StoredState = StoredState;
                 $scope.CommonState = CommonState;
+                
+                $scope.$watch('StoredState.interestType', function(newInterest, oldInterest) {
+                    if(newInterest !== oldInterest){
+                        AquaticBiologyMap.getMap().switchToInterest(newInterest);
+//                        CommonState.interestTypeDescription = interestTypeDescriptions[newInterest];
+                    }
+                });
                 
                 $scope.$watch('CommonState.activatedMapControl', function(newControl, oldControl) {
                     var controlId;

@@ -4,6 +4,13 @@
 		<div>
 		    <em ng-bind-html="description"></em>
 		</div>
+        <h4 style="color: red" ng-show="!modeledSelected()" ng-bind="disclaimer"></h4>
+        <span ng-if="!modeledSelected()">
+            Modeled streamflow is <strong>preliminary</strong> and subject to 
+            change. <a href="#/workflow/streamflow-statistics/model-info" target="_blank">
+                Documentation in Review. <i class="fa fa-external-link"></i>
+            </a>
+        </span>
 	</div>
 </div>
 <div class="row">

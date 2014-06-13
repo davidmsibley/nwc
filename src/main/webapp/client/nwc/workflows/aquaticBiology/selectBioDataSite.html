@@ -1,3 +1,13 @@
+<div class="row col-xs-12">
+    Streamflow Type:
+    <div class="btn-group">
+        <button type="button" class="btn btn-primary" ng-model="StoredState.interestType" btn-radio="undefined">None</button>
+        <button type="button" class="btn btn-primary" ng-model="StoredState.interestType" btn-radio="'observed'">Observed</button>
+        <button type="button" class="btn btn-primary" ng-model="StoredState.interestType" btn-radio="'modeled'">Modeled</button>
+    </div>
+    <span ng-bind-html="CommonState.interestTypeDescription.description" ng-show="observedSelected()"></span>
+</div>
+
 <div class="row spacer spacer_down col-xs-12">
     Map Controls:
     <div class="btn-group">
@@ -7,4 +17,21 @@
     </div>
     <span>{{CommonState.mapControlDescription}}</span>
 </div>
+
+<div class="row spacer spacer_down col-xs-12" ng-show="observedSelected()">
+    Stream Gage Filters:
+    <div class="btn-group">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+        {{CommonState.gageStyleDescription}}<span> <i class="caret"></i></span>
+        </button>
+        <ul class="dropdown-menu" role="menu">
+            <li role="menuitem"><a ng-model="StoredState.gageStyle" btn-radio="'default'">{{styleDescriptions.default.description}}</a></li>
+            <li role="menuitem"><a ng-model="StoredState.gageStyle" btn-radio="'active'">{{styleDescriptions.active.description}}</a></li>
+            <li role="menuitem"><a ng-model="StoredState.gageStyle" btn-radio="'reference'">{{styleDescriptions.reference.description}}</a></li>
+            <li role="menuitem"><a ng-model="StoredState.gageStyle" btn-radio="'por'">{{styleDescriptions.por.description}}</a></li>
+        </ul>
+    </div>
+    Options to filter displayed stream gages from the <a href="http://pubs.er.usgs.gov/publication/70046617" target="_blank">Gages II dataset <i class="fa fa-external-link"></i></a>
+</div>
+
 <div id="bioSiteSelectMap" class="row spacer col-xs-12" ng-style="CommonState.mapControlCursor" style="height: 500px;"></div>
