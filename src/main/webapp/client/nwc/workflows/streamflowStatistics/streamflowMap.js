@@ -85,38 +85,43 @@
 
                 wmsGetFeatureInfoControl.events.register("getfeatureinfo", {}, wmsGetFeatureInfoHandler);
                 initialControls.push(wmsGetFeatureInfoControl);
-                    
-                var hucsGetFeatureInfoControl = new OpenLayers.Control.WMSGetFeatureInfo({
-                    id: 'nwc-streamflow-huc-identify-control',
-                    title: 'huc-identify-control',
-                    hover: false,
-                    layers: [
-                        hucLayer
-                    ],
-                    queryVisible: true,
-                    output: 'object',
-                    drillDown: true,
-                    infoFormat: 'application/vnd.ogc.gml',
-                    vendorParams: {
-                        radius: 5
-                    },
-                    autoActivate: false
-                });
                 
+                var wfsProtocol = OpenLayers.Protocol.WFS.fromWMSLayer(hucLayer, {
+                    url : CONFIG.endpoint.geoserver + "wfs",
+                    srsName : "EPSG:3857",
+                    //TODO! I really don't like this. I'd like to only ask for what I need at this moment, but
+                    //this is given to the next step of the workflow, so it relys on this...
+                    propertyNames : ["OBJECTID","HUC12","mi2","DRAIN_SQKM",
+                        "SLOPE_PCT","RFACT","SILTAVE","ROCKDEPAVE","PPTAVG_BAS",
+                        "PLANTNLCD0","HUC4","Outlet_X","Outlet_Y","Centroid_X",
+                        "Centroid_Y","Shape_Leng","Shape_Area","site_no","HU_12_NAME"]
+                });
+                var hucsGetFeatureControl = new OpenLayers.Control.GetFeature({
+                    id: 'nwc-streamflow-huc-identify-control',
+                    protocol : wfsProtocol,
+                    autoActivate: false,
+                    maxFeatures : null
+                });
                 var minStatDate = Date.create('1980/10/01').utc();
                 var maxStatDate = Date.create('2010/09/30').utc();
-                var featureInfoHandler = function (responseObject) {
-                    //for some reason the real features are inside an array
-                    var actualFeatures = responseObject.features[0].features;
+                var featureHandler = function(eventName, responseObject) {
+                    console.log("Hit " + eventName);
+                    var actualFeatures = responseObject.features;
                     var hucCount = actualFeatures.length;
                     if (0 === hucCount) {
-                        //nothing
-                    }
-                    else {
-                        var sortedFeatures = actualFeatures.sort(function(a, b){
-                            return a.data.mi2 - b.data.mi2;
+                        //nothing (In fact, we won't even get here if there are no features to select)
+                    } else {
+                        var sortedFeature = actualFeatures.min(function(el){
+                            var result = Infinity;
+                            
+                            var mi2 = parseFloat(el.data.mi2);
+                            if (mi2) {
+                                result = mi2;
+                            }
+                            
+                            return result;
                         });
-                        StoredState.streamFlowStatHucFeature = sortedFeatures[0];
+                        StoredState.streamFlowStatHucFeature = sortedFeature;
                         CommonState.streamFlowStatMinDate = minStatDate;
                         CommonState.streamFlowStatMaxDate = maxStatDate;
                         StoredState.siteStatisticsParameters = {};
@@ -132,8 +137,10 @@
                         }
                     }
                 };
-                hucsGetFeatureInfoControl.events.register("getfeatureinfo", {}, featureInfoHandler);
-                initialControls.push(hucsGetFeatureInfoControl);
+                
+                var eventToHandle = "featuresselected"
+                hucsGetFeatureControl.events.register(eventToHandle, {}, featureHandler.fill(eventToHandle));
+                initialControls.push(hucsGetFeatureControl);
                 
                 var legend = new OpenLayers.Control.Attribution();
                 initialControls.push(legend);
@@ -249,7 +256,7 @@
                  */
                 map.switchToInterest = function(interest){
                     if('observed' === interest){
-                        hucsGetFeatureInfoControl.deactivate();
+                        hucsGetFeatureControl.deactivate();
                         hucLayer.setVisibility(false);
                         StoredState.streamFlowStatHucFeature = undefined;
                         
@@ -265,7 +272,7 @@
                         StoredState.gage = undefined;
 
                         hucLayer.setVisibility(true);
-                        hucsGetFeatureInfoControl.activate();
+                        hucsGetFeatureControl.activate();
 
                     }
                     else{
