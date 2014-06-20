@@ -66,8 +66,8 @@
                         controlId = 'nwc-zoom';
                     } else if (newControl === 'pan') {
                         controlId = 'nwc-navigation';
-                    } else {
-                        controlId = 'nwc-biodata-sites';
+                    } else { //TODO[Sibley] Nope, this is bad.
+                        controlId = "nwc-streamflow-gage-identify-control";//'nwc-biodata-sites';
                     }
                     if (newControl !== oldControl) {
                         var controls = AquaticBiologyMap.getMap().getControlsBy('id', /nwc-.*/);
@@ -88,13 +88,13 @@
             }
         )
     ]);
-    aquaticBiologyControllers.controller('ShowSelectedBioDataSites', ['$scope', 'StoredState', 'CommonState', 'StoredState',
+    aquaticBiologyControllers.controller('ShowSelectedBioDataSites', ['$scope', 'StoredState', 'CommonState',
         NWC.ControllerHelpers.StepController(
             {
                 name: 'Aquatic Biology Site Selection List',
                 description: 'Select which sites to explore in BioShare'
             },
-            function ($scope, StoredState, CommonState, StoredState) {
+            function ($scope, StoredState, CommonState) {
                 $scope.CommonState = CommonState;
                 $scope.StoredState = StoredState;
                 StoredState.selectedAquaticBiologySites = StoredState.selectedAquaticBiologySites || [];
